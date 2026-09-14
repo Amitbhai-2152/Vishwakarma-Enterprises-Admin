@@ -53,9 +53,8 @@
   },
   {
     "id": "P002",
-    "category": "hardware",
     "brand": "Your Brand",
-    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
+    "category": "hardware",
     "name": {
       "hi": "उत्पाद 02",
       "en": "Product 02"
@@ -64,6 +63,8 @@
       "hi": "यहाँ उत्पाद का विवरण लिखें।",
       "en": "Write the product description here."
     },
+    "sizes": [],
+    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises-Admin/main/images/products/P002.jpg",
     "featured": true
   },
   {
