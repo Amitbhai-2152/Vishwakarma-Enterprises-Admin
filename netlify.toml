@@ -1,0 +1,13 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/github-exchange"
+  to = "/.netlify/functions/github-exchange"
+  status = 200
+
+[[redirects]]
+  from = "/oauth-callback.html"
+  to = "/oauth-callback.html"
+  status = 200
