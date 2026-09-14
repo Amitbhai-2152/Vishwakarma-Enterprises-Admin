@@ -69,9 +69,8 @@
   },
   {
     "id": "P003",
-    "category": "plumbing",
     "brand": "Your Brand",
-    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
+    "category": "plumbing",
     "name": {
       "hi": "उत्पाद 03",
       "en": "Product 03"
@@ -80,13 +79,23 @@
       "hi": "यहाँ उत्पाद का विवरण लिखें।",
       "en": "Write the product description here."
     },
+    "features": {
+      "hi": [],
+      "en": []
+    },
+    "specifications": {
+      "hi": {},
+      "en": {}
+    },
+    "sizes": [],
+    "mrp": 200,
+    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
     "featured": true
   },
   {
     "id": "P004",
-    "category": "water",
     "brand": "Your Brand",
-    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
+    "category": "water",
     "name": {
       "hi": "उत्पाद 04",
       "en": "Product 04"
@@ -95,6 +104,17 @@
       "hi": "यहाँ उत्पाद का विवरण लिखें।",
       "en": "Write the product description here."
     },
+    "features": {
+      "hi": [],
+      "en": []
+    },
+    "specifications": {
+      "hi": {},
+      "en": {}
+    },
+    "sizes": [],
+    "mrp": 449,
+    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
     "featured": true
   },
   {
@@ -159,9 +179,8 @@
   },
   {
     "id": "P009",
-    "category": "pumps",
     "brand": "Your Brand",
-    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
+    "category": "pumps",
     "name": {
       "hi": "उत्पाद 09",
       "en": "Product 09"
@@ -170,6 +189,17 @@
       "hi": "यहाँ उत्पाद का विवरण लिखें।",
       "en": "Write the product description here."
     },
+    "features": {
+      "hi": [],
+      "en": []
+    },
+    "specifications": {
+      "hi": {},
+      "en": {}
+    },
+    "sizes": [],
+    "mrp": 499.66,
+    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
     "featured": false
   }
 ]
