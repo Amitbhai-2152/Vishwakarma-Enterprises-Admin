@@ -19,9 +19,8 @@
   },
   {
     "id": "P001",
-    "category": "plumbing",
     "brand": "Your Brand",
-    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
+    "category": "plumbing",
     "name": {
       "hi": "उत्पाद 01",
       "en": "Product 01"
@@ -30,6 +29,8 @@
       "hi": "यहाँ उत्पाद का विवरण लिखें।",
       "en": "Write the product description here."
     },
+    "sizes": [],
+    "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises-Admin/main/images/products/P001.jpg",
     "featured": true
   },
   {
