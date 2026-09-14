@@ -8,6 +8,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/admin-auth"
+  to = "/.netlify/functions/admin-auth"
+  status = 200
+
+[[redirects]]
   from = "/oauth-callback.html"
   to = "/oauth-callback.html"
   status = 200
