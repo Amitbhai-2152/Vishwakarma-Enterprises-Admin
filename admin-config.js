@@ -3,5 +3,6 @@ window.ADMIN_CONFIG={
   repoOwner:'Amitbhai-2152',
   repoName:'Vishwakarma-Enterprises-Admin',
   dataPath:'data/products.json',
-  githubClientId:'Iv23licQXQzKHN3uSRqS'
+  githubClientId:'Iv23licQXQzKHN3uSRqS',
+  githubExchangeUrl:'/api/github-exchange'
 };
