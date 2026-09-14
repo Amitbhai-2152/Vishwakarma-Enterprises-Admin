@@ -1,0 +1,3 @@
+id,name_hi,name_en,category,brand,description_hi,description_en,sizes,featured,image_url
+P011,स्टार्टर उत्पाद 11,Starter Product 11,plumbing,Brand,यहाँ विवरण लिखें,Write description here,"1/2 inch; 3/4 inch",false,
+P012,स्टार्टर उत्पाद 12,Starter Product 12,hardware,Brand,यहाँ विवरण लिखें,Write description here,"10 mm; 12 mm",true,
