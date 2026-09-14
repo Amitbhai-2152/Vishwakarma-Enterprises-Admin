@@ -60,5 +60,4 @@
     document.addEventListener('click',e=>{if(e.target.closest('#newProductBtn,[data-edit]'))refresh()});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance);else enhance();
-  const loader=document.createElement('script');loader.src='variants-admin.js?v=2';loader.defer=false;document.head.appendChild(loader);
 })();
