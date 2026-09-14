@@ -2,7 +2,7 @@
   const byId=id=>document.getElementById(id);
   const parseLines=id=>(byId(id)?.value||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
   const parseSpecs=id=>parseLines(id).map(line=>{const i=line.indexOf(':');return i>0?{key:line.slice(0,i).trim(),value:line.slice(i+1).trim()}:{key:line,value:''}});
-  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
   function rowEditor({id,title,placeholder,rows,mode='feature'}){
     const wrap=document.createElement('div');wrap.className='enhanced-editor';wrap.dataset.target=id;
     const head=document.createElement('div');head.className='enhanced-editor-head';
@@ -46,7 +46,6 @@
         const list=e.querySelector('.enhanced-list');
         const values=id.startsWith('specifications')?parseSpecs(id).map(x=>x):parseLines(id).map(x=>({key:x}));
         list.innerHTML='';
-        const add=e.querySelector('.enhanced-add');
         const mode=id.startsWith('specifications')?'spec':'feature';
         const placeholder=mode==='spec'?'Key':'Enter a feature';
         const make=item=>{
@@ -61,4 +60,5 @@
     document.addEventListener('click',e=>{if(e.target.closest('#newProductBtn,[data-edit]'))refresh()});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance);else enhance();
+  const loader=document.createElement('script');loader.src='variants-admin.js?v=2';loader.defer=false;document.head.appendChild(loader);
 })();
