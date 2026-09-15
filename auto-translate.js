@@ -4,13 +4,12 @@
     {hi:'descriptionHi',en:'descriptionEn',feature:false}
   ];
   const timers={};
-  const state={};
+  const requests={};
   const $=id=>document.getElementById(id);
 
   function clean(v){return String(v??'').trim()}
   function sourceLang(id){return id.endsWith('Hi')?'hi':'en'}
-  function isHindiText(text){return /[\u0900-\u097F]/.test(String(text||''))}
-  function splitLines(text){return String(text||'').split(/\r?\n/)}
+  function splitLines(text){return String(text||'').split(/\r?\n/) }
 
   async function requestTranslation(text,source,target){
     const value=clean(text);
@@ -24,50 +23,45 @@
     }catch{return ''}
   }
 
-  async function translateFeatureBlock(text,source,target){
-    const lines=splitLines(text);
-    const output=[];
-    for(const line of lines){
-      const value=clean(line);
-      if(!value){output.push('');continue}
-      const translated=await requestTranslation(value,source,target);
-      output.push(translated||value);
+  async function translateFeatureBlock(text,source,target,requestId){
+    const result=[];
+    for(const raw of splitLines(text)){
+      const line=clean(raw);
+      if(!line){result.push('');continue}
+      const translated=await requestTranslation(line,source,target);
+      if(requests[requestId]?.cancelled)return '';
+      result.push(translated||line);
     }
-    return output.join('\n');
+    return result.join('\n');
   }
 
-  function pairFor(sourceId,targetId){
-    return sourceId+'>'+targetId;
+  function key(sourceId,targetId){return sourceId+'>'+targetId}
+  function cancel(sourceId,targetId){
+    const k=key(sourceId,targetId);
+    if(requests[k])requests[k].cancelled=true;
+    clearTimeout(timers[k]);
   }
 
-  function getState(sourceId,targetId){
-    const key=pairFor(sourceId,targetId);
-    return state[key]||(state[key]={lastSource:'',lastTarget:'',targetDirty:false,request:0});
-  }
-
-  async function sync(sourceId,targetId,force){
+  async function sync(sourceId,targetId,force=false){
     const source=$(sourceId),target=$(targetId);
     if(!source||!target)return;
     const text=clean(source.value);
     if(!text)return;
 
-    const s=getState(sourceId,targetId);
-    if(!force && s.targetDirty && clean(target.value))return;
+    const k=key(sourceId,targetId);
+    const requestId={id:Date.now()+Math.random(),cancelled:false};
+    requests[k]=requestId;
 
-    const requestId=++s.request;
     const feature=pairs.some(p=>p.feature&&p.hi===sourceId);
     const translated=feature
-      ? await translateFeatureBlock(source.value,sourceLang(sourceId),sourceLang(targetId))
+      ? await translateFeatureBlock(source.value,sourceLang(sourceId),sourceLang(targetId),k)
       : await requestTranslation(source.value,sourceLang(sourceId),sourceLang(targetId));
 
-    if(!translated||requestId!==s.request||clean(source.value)!==text)return;
+    if(requests[k]!==requestId||requestId.cancelled)return;
+    if(!translated||clean(source.value)!==text)return;
 
     target.value=translated;
-    s.lastSource=text;
-    s.lastTarget=translated;
-    s.targetDirty=false;
     target.dataset.autoTranslated='true';
-
     if(feature){
       window.veFeatureSet?.(targetId,translated,-1);
     }else{
@@ -77,88 +71,61 @@
   }
 
   function schedule(sourceId,targetId){
-    const key=pairFor(sourceId,targetId);
-    clearTimeout(timers[key]);
-    timers[key]=setTimeout(()=>sync(sourceId,targetId,false),900);
+    cancel(sourceId,targetId);
+    const k=key(sourceId,targetId);
+    timers[k]=setTimeout(()=>sync(sourceId,targetId,false),700);
   }
 
-  function forceTranslate(sourceId,targetId){
-    const s=getState(sourceId,targetId);
-    s.targetDirty=false;
-    s.request++;
+  function force(sourceId,targetId){
+    cancel(sourceId,targetId);
     sync(sourceId,targetId,true);
   }
 
-  function addButton(label,handler){
-    const button=document.createElement('button');
-    button.type='button';
-    button.className='mini-btn auto-translate-btn';
-    button.textContent=label;
-    button.addEventListener('click',event=>{event.preventDefault();handler()});
-    return button;
+  function addButton(text,handler){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='mini-btn auto-translate-btn';
+    b.textContent=text;
+    b.addEventListener('click',e=>{e.preventDefault();handler()});
+    return b;
   }
 
   function setupDescriptionPair(pair){
     const hi=$(pair.hi),en=$(pair.en);
-    if(!hi||!en)return;
-    if(!hi.dataset.translationBound){
-      hi.dataset.translationBound='1';
-      en.dataset.translationBound='1';
+    if(!hi||!en||hi.dataset.translationReady)return;
+    hi.dataset.translationReady='1';
+    en.dataset.translationReady='1';
 
-      hi.closest('label')?.insertBefore(addButton('↔ Auto English',()=>forceTranslate(pair.hi,pair.en)),hi);
-      en.closest('label')?.insertBefore(addButton('↔ Auto Hindi',()=>forceTranslate(pair.en,pair.hi)),en);
+    hi.closest('label')?.insertBefore(addButton('↔ Auto English',()=>force(pair.hi,pair.en)),hi);
+    en.closest('label')?.insertBefore(addButton('↔ Auto Hindi',()=>force(pair.en,pair.hi)),en);
 
-      hi.addEventListener('input',()=>{
-        const s=getState(pair.hi,pair.en);
-        s.targetDirty=false;
-        delete state[pairFor(pair.hi,pair.en)].lastTarget;
-        schedule(pair.hi,pair.en);
+    function bind(id,other){
+      $(id).addEventListener('input',()=>{
+        if($(id).dataset.autoTranslated==='true'){
+          delete $(id).dataset.autoTranslated;
+          return;
+        }
+        cancel(other,id);
+        schedule(id,other);
       });
-      en.addEventListener('input',()=>{
-        const s=getState(pair.en,pair.hi);
-        s.targetDirty=false;
-        const reverse=getState(pair.en,pair.hi);
-        reverse.targetDirty=false;
-        schedule(pair.en,pair.hi);
-      });
-
-      // A target field should only become protected when the user actually edits it.
-      // Programmatic input events generated after an auto-translation are ignored.
-      const protectManual=(id,targetId)=>{
-        $(id).addEventListener('input',event=>{
-          if($(id).dataset.autoTranslated==='true'){
-            delete $(id).dataset.autoTranslated;
-            return;
-          }
-          const reverse=getState(id,targetId);
-          reverse.targetDirty=true;
-          clearTimeout(timers[pairFor(targetId,id)]);
-        });
-      };
-      protectManual(hi,pair.en);
-      protectManual(en,pair.hi);
     }
+    bind(pair.hi,pair.en);
+    bind(pair.en,pair.hi);
   }
 
-  function featureEditorInput(event){
+  function featureInput(event){
     const input=event.target.closest('.ve-feature-input');
     if(!input)return;
     const editor=input.closest('.ve-feature-editor');
     if(!editor)return;
     const sourceId=editor.id.replace(/Editor$/,'');
     const targetId=sourceId==='featuresHi'?'featuresEn':'featuresHi';
-    const reverse=getState(sourceId,targetId);
-    reverse.targetDirty=false;
-    const targetState=getState(targetId,sourceId);
-    targetState.targetDirty=true;
-    clearTimeout(timers[pairFor(targetId,sourceId)]);
     schedule(sourceId,targetId);
   }
 
   function init(){
-    pairs.filter(p=>!p.feature).forEach(setupDescriptionPair);
-    document.addEventListener('input',featureEditorInput);
+    setupDescriptionPair(pairs.find(p=>!p.feature));
+    document.addEventListener('input',featureInput);
   }
-
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
