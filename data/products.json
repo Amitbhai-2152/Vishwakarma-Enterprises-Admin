@@ -15,14 +15,6 @@
       "hi": [],
       "en": []
     },
-    "specifications": {
-      "hi": {
-        "wow this is good": "wow thiss is good"
-      },
-      "en": {
-        "this is grow": "wow123"
-      }
-    },
     "sizes": [
       {
         "name": "45mm",
@@ -56,10 +48,6 @@
     "features": {
       "hi": [],
       "en": []
-    },
-    "specifications": {
-      "hi": {},
-      "en": {}
     },
     "sizes": [],
     "mrp": 449,
@@ -141,10 +129,6 @@
     "features": {
       "hi": [],
       "en": []
-    },
-    "specifications": {
-      "hi": {},
-      "en": {}
     },
     "sizes": [],
     "mrp": 499.66,
