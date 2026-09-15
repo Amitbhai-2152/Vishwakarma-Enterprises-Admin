@@ -34,7 +34,6 @@
     rows.innerHTML=currentVariants.length
       ?currentVariants.map((v,i)=>`<div class="variant-row" data-index="${i}"><input class="variant-name" type="text" placeholder="Size / variant (e.g. 25 mm)"><input class="variant-mrp" type="number" min="0" step="0.01" inputmode="decimal" placeholder="MRP (₹)"><span class="variant-preview">—</span><button type="button" class="icon-btn variant-remove" aria-label="Remove size">×</button></div>`).join('')
       :'<div class="variant-empty">No sizes added yet. Add a size/variant to give it a separate MRP.</div>';
-
     currentVariants.forEach((v,i)=>{
       const row=rows.children[i];
       if(!row)return;
@@ -42,7 +41,6 @@
       row.querySelector('.variant-mrp').value=v.mrp||'';
       row.querySelector('.variant-preview').textContent=money(v.mrp);
     });
-
     rows.querySelectorAll('.variant-name').forEach((el,i)=>el.addEventListener('input',()=>{
       currentVariants[i].name=el.value;
       syncLegacy();
@@ -58,7 +56,6 @@
       syncLegacy();
     }));
     syncLegacy();
-
     if(focusNew){
       requestAnimationFrame(()=>{
         const fields=rows.querySelectorAll('.variant-name');
@@ -89,20 +86,16 @@
     if(e.target!==form())return;
     e.preventDefault();
     e.stopImmediatePropagation();
-
     const previous=products.find(p=>p.id===editingId);
     const id=input('productId').value.trim();
     const nameHi=input('nameHi').value.trim();
     const nameEn=input('nameEn').value.trim();
     if(!id||!nameHi||!nameEn){toast('Please fill Product ID and both names.');return}
     if(products.some(p=>p.id===id&&p.id!==editingId)){toast('That Product ID already exists.');return}
-
-    const variants=currentVariants
-      .map(v=>({name:String(v.name||'').trim(),mrp:Number(v.mrp)||0}))
-      .filter(v=>v.name);
+    const variants=currentVariants.map(v=>({name:String(v.name||'').trim(),mrp:Number(v.mrp)||0})).filter(v=>v.name);
     if(!variants.length){toast('Add at least one size/variant and enter its MRP.');return}
     if(variants.some(v=>v.mrp<0||!Number.isFinite(v.mrp))){toast('Please enter a valid MRP for every size/variant.');return}
-
+    const status=input('productStatus')?.value==='hidden'?'hidden':'active';
     const product={
       id,
       brand:input('brand').value.trim(),
@@ -113,9 +106,9 @@
       sizes:variants,
       mrp:Number(variants[0].mrp)||0,
       image:selectedImageData||previous?.image||fallbackImage,
-      featured:input('featured').checked
+      featured:input('featured').checked,
+      status
     };
-
     products=editingId?products.map(p=>p.id===editingId?product:p):[product,...products];
     saveDraft();
     render();
@@ -127,9 +120,5 @@
   style.textContent='.variant-pricing-panel{grid-column:1/-1;padding:16px;border:1px solid #dfe4ea;border-radius:14px;background:#fafbfc}.variant-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.variant-head strong{display:block}.variant-head small{display:block;color:#667085;margin-top:4px;line-height:1.5}.variant-rows{display:grid;gap:9px}.variant-row{display:grid;grid-template-columns:minmax(0,1fr) 160px 100px 40px;gap:8px;align-items:center}.variant-row input{min-width:0}.variant-preview{font-size:13px;font-weight:700;color:#c62828;white-space:nowrap}.variant-empty{padding:12px;border:1px dashed #cfd6df;border-radius:10px;color:#667085;background:#fff}.variant-remove{height:42px}.variant-pricing-panel .field-hint{display:block;margin-top:10px}@media(max-width:700px){.variant-head{flex-direction:column}.variant-row{grid-template-columns:1fr 1fr 36px}.variant-preview{display:none}}';
   document.head.appendChild(style);
 
-  document.addEventListener('DOMContentLoaded',()=>{
-    patchEditor();
-    ensurePanel();
-    form()?.addEventListener('submit',onSubmit,true);
-  });
+  document.addEventListener('DOMContentLoaded',()=>{patchEditor();ensurePanel();form()?.addEventListener('submit',onSubmit,true)});
 })();
