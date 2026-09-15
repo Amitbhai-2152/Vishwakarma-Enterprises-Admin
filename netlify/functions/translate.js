@@ -1,54 +1,29 @@
-export default async function handler(request) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
+exports.handler = async function(event){
+  const headers={
+    'Access-Control-Allow-Origin':'*',
+    'Access-Control-Allow-Headers':'Content-Type',
+    'Access-Control-Allow-Methods':'GET,OPTIONS'
   };
 
-  if (request.method === 'OPTIONS') {
-    return new Response('', { status: 204, headers });
+  if(event.httpMethod==='OPTIONS')return{statusCode:204,headers,body:''};
+
+  try{
+    const params=event.queryStringParameters||{};
+    const text=String(params.text||'').trim();
+    const source=String(params.source||'en').trim().toLowerCase();
+    const target=String(params.target||'hi').trim().toLowerCase();
+
+    if(!text)return{statusCode:400,headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({success:false,error:'Text is required.'})};
+
+    const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+encodeURIComponent(source+'|'+target);
+    const response=await fetch(url,{headers:{Accept:'application/json'}});
+    if(!response.ok)throw new Error('Translation service returned '+response.status+'.');
+    const data=await response.json();
+    const translated=String(data?.responseData?.translatedText||'').trim();
+    if(!translated)throw new Error('Translation service returned no translation.');
+
+    return{statusCode:200,headers:{...headers,'Content-Type':'application/json','Cache-Control':'no-store'},body:JSON.stringify({success:true,translated})};
+  }catch(error){
+    return{statusCode:502,headers:{...headers,'Content-Type':'application/json','Cache-Control':'no-store'},body:JSON.stringify({success:false,error:error?.message||'Translation failed.'})};
   }
-
-  try {
-    const url = new URL(request.url);
-    let text = url.searchParams.get('text') || '';
-    let source = url.searchParams.get('source') || 'en';
-    let target = url.searchParams.get('target') || 'hi';
-
-    if (request.method === 'POST') {
-      const body = await request.json().catch(() => ({}));
-      text = body.text || text;
-      source = body.source || source;
-      target = body.target || target;
-    }
-
-    text = String(text).trim();
-    source = String(source).trim().toLowerCase();
-    target = String(target).trim().toLowerCase();
-
-    if (!text) {
-      return new Response(JSON.stringify({ success: false, error: 'Text is required.' }), {
-        status: 400,
-        headers: { ...headers, 'Content-Type': 'application/json' }
-      });
-    }
-
-    const mm = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(source + '|' + target)}`;
-    const r = await fetch(mm, { headers: { 'Accept': 'application/json' } });
-    if (!r.ok) throw new Error(`Translation service returned ${r.status}.`);
-
-    const data = await r.json();
-    const translated = String(data?.responseData?.translatedText || '').trim();
-    if (!translated) throw new Error('Translation service returned no translation.');
-
-    return new Response(JSON.stringify({ success: true, translated }), {
-      status: 200,
-      headers: { ...headers, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({ success: false, error: error?.message || 'Translation failed.' }), {
-      status: 502,
-      headers: { ...headers, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
-    });
-  }
-}
+};
