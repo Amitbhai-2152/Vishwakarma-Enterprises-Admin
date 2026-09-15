@@ -1,131 +1,103 @@
 (function(){
-  const pairs=[
-    {hi:'featuresHi',en:'featuresEn',feature:true},
-    {hi:'descriptionHi',en:'descriptionEn',feature:false}
-  ];
-  const timers={};
-  const requests={};
   const $=id=>document.getElementById(id);
+  const timers={},busy={};
+  const romanHints=new Set(['mai','main','mein','me','mujhe','mera','meri','mere','hum','ham','hai','hain','hu','ho','hoon','hun','tha','thi','the','aap','ap','tum','tu','ye','yah','woh','wo','vo','kya','kaise','kaisa','kyu','kyon','kyun','nahi','nahin','na','se','ko','ke','ki','ka','par','pe','aur','bhi','bahut','bohot','acha','achha','accha','ek','iske','uske','karna','karo','karta','karte','wali','wala','waale','chahiye','raha','rahi','rahe','mujhse','apna','apne','apni','sab','kuch','kaam','naam','ghar','pani','paani','kaha','kab','kyonki']);
+  const clean=v=>String(v??'').trim();
+  const hasHindi=v=>/[\u0900-\u097F]/.test(String(v||''));
+  const detectSource=(text,fallback='en')=>{const v=clean(text);if(hasHindi(v))return 'hi';const words=v.toLowerCase().split(/[^a-z]+/).filter(Boolean);return words.some(w=>romanHints.has(w))?'hi':fallback};
+  const targetLang=id=>id.endsWith('Hi')?'hi':'en';
+  const key=(a,b)=>a+'>'+b;
 
-  function clean(v){return String(v??'').trim()}
-  function sourceLang(id){return id.endsWith('Hi')?'hi':'en'}
-  function splitLines(text){return String(text||'').split(/\r?\n/) }
-
-  async function requestTranslation(text,source,target){
-    const value=clean(text);
-    if(!value)return '';
+  async function requestTranslation(text,target,sourceFallback){
+    const value=clean(text);if(!value)return '';
+    const source=detectSource(value,sourceFallback);
     try{
       const url='/.netlify/functions/translate?source='+encodeURIComponent(source)+'&target='+encodeURIComponent(target)+'&text='+encodeURIComponent(value);
-      const response=await fetch(url,{cache:'no-store',headers:{Accept:'application/json'}});
-      if(!response.ok)return '';
-      const data=await response.json().catch(()=>null);
-      return data?.success?clean(data.translated):'';
+      const r=await fetch(url,{cache:'no-store',headers:{Accept:'application/json'}});
+      const data=await r.json().catch(()=>null);
+      return r.ok&&data?.success?clean(data.translated):'';
     }catch{return ''}
   }
 
-  async function translateFeatureBlock(text,source,target,requestId){
-    const result=[];
-    for(const raw of splitLines(text)){
-      const line=clean(raw);
-      if(!line){result.push('');continue}
-      const translated=await requestTranslation(line,source,target);
-      if(requests[requestId]?.cancelled)return '';
-      result.push(translated||line);
-    }
-    return result.join('\n');
+  function setAuto(el){if(el)el.dataset.autoTranslated='true'}
+  function consumeAuto(el){if(el?.dataset.autoTranslated==='true'){delete el.dataset.autoTranslated;return true}return false}
+
+  async function translateDescription(sourceId,targetId,force=false){
+    const source=$(sourceId),target=$(targetId);if(!source||!target)return;
+    const text=clean(source.value);if(!text)return;
+    if(!force&&clean(target.value)&&!target.dataset.autoTranslated)return;
+    const id=key(sourceId,targetId),token=(busy[id]||0)+1;busy[id]=token;
+    const translated=await requestTranslation(text,targetLang(targetId),sourceId.endsWith('Hi')?'hi':'en');
+    if(busy[id]!==token||clean(source.value)!==text||!translated)return;
+    target.value=translated;setAuto(target);
   }
 
-  function key(sourceId,targetId){return sourceId+'>'+targetId}
-  function cancel(sourceId,targetId){
-    const k=key(sourceId,targetId);
-    if(requests[k])requests[k].cancelled=true;
-    clearTimeout(timers[k]);
+  function scheduleDescription(sourceId,targetId){const id=key(sourceId,targetId);clearTimeout(timers[id]);timers[id]=setTimeout(()=>translateDescription(sourceId,targetId),800)}
+
+  function addButton(label,handler){
+    const b=document.createElement('button');b.type='button';b.className='mini-btn auto-translate-btn';b.textContent=label;b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();handler()});return b;
   }
 
-  async function sync(sourceId,targetId,force=false){
-    const source=$(sourceId),target=$(targetId);
-    if(!source||!target)return;
-    const text=clean(source.value);
-    if(!text)return;
-
-    const k=key(sourceId,targetId);
-    const requestId={id:Date.now()+Math.random(),cancelled:false};
-    requests[k]=requestId;
-
-    const feature=pairs.some(p=>p.feature&&p.hi===sourceId);
-    const translated=feature
-      ? await translateFeatureBlock(source.value,sourceLang(sourceId),sourceLang(targetId),k)
-      : await requestTranslation(source.value,sourceLang(sourceId),sourceLang(targetId));
-
-    if(requests[k]!==requestId||requestId.cancelled)return;
-    if(!translated||clean(source.value)!==text)return;
-
-    target.value=translated;
-    target.dataset.autoTranslated='true';
-    if(feature){
-      window.veFeatureSet?.(targetId,translated,-1);
-    }else{
-      target.dispatchEvent(new Event('input',{bubbles:true}));
-      target.dispatchEvent(new Event('change',{bubbles:true}));
+  function installDescriptionControls(){
+    const hi=$('descriptionHi'),en=$('descriptionEn');if(!hi||!en)return;
+    if(!hi.dataset.translationReady){
+      hi.dataset.translationReady='1';en.dataset.translationReady='1';
+      hi.closest('label')?.insertBefore(addButton('↔ Auto English',()=>translateDescription('descriptionHi','descriptionEn',true)),hi);
+      en.closest('label')?.insertBefore(addButton('↔ Auto Hindi',()=>translateDescription('descriptionEn','descriptionHi',true)),en);
+      hi.addEventListener('input',()=>{if(consumeAuto(hi))return;clearTimeout(timers[key('descriptionEn','descriptionHi')]);scheduleDescription('descriptionHi','descriptionEn')});
+      en.addEventListener('input',()=>{if(consumeAuto(en))return;clearTimeout(timers[key('descriptionHi','descriptionEn')]);scheduleDescription('descriptionEn','descriptionHi')});
     }
   }
 
-  function schedule(sourceId,targetId){
-    cancel(sourceId,targetId);
-    const k=key(sourceId,targetId);
-    timers[k]=setTimeout(()=>sync(sourceId,targetId,false),700);
-  }
-
-  function force(sourceId,targetId){
-    cancel(sourceId,targetId);
-    sync(sourceId,targetId,true);
-  }
-
-  function addButton(text,handler){
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='mini-btn auto-translate-btn';
-    b.textContent=text;
-    b.addEventListener('click',e=>{e.preventDefault();handler()});
-    return b;
-  }
-
-  function setupDescriptionPair(pair){
-    const hi=$(pair.hi),en=$(pair.en);
-    if(!hi||!en||hi.dataset.translationReady)return;
-    hi.dataset.translationReady='1';
-    en.dataset.translationReady='1';
-
-    hi.closest('label')?.insertBefore(addButton('↔ Auto English',()=>force(pair.hi,pair.en)),hi);
-    en.closest('label')?.insertBefore(addButton('↔ Auto Hindi',()=>force(pair.en,pair.hi)),en);
-
-    function bind(id,other){
-      $(id).addEventListener('input',()=>{
-        if($(id).dataset.autoTranslated==='true'){
-          delete $(id).dataset.autoTranslated;
-          return;
-        }
-        cancel(other,id);
-        schedule(id,other);
-      });
+  async function translateFeatures(sourceId,targetId,force=false){
+    const source=$(sourceId),target=$(targetId);if(!source||!target)return;
+    const text=clean(source.value);if(!text)return;
+    if(!force&&clean(target.value)&&!target.dataset.autoTranslated)return;
+    const id=key(sourceId,targetId),token=(busy[id]||0)+1;busy[id]=token;
+    const out=[];
+    for(const raw of String(source.value).split(/\r?\n/)){
+      if(!clean(raw)){out.push('');continue}
+      const translated=await requestTranslation(raw,targetLang(targetId),sourceId.endsWith('Hi')?'hi':'en');
+      if(busy[id]!==token||clean(source.value)!==text)return;
+      out.push(translated||clean(raw));
     }
-    bind(pair.hi,pair.en);
-    bind(pair.en,pair.hi);
+    const translated=out.join('\n');
+    if(busy[id]!==token||clean(source.value)!==text||!translated)return;
+    target.value=translated;setAuto(target);window.veFeatureSet?.(targetId,translated,-1);
   }
 
-  function featureInput(event){
-    const input=event.target.closest('.ve-feature-input');
-    if(!input)return;
-    const editor=input.closest('.ve-feature-editor');
-    if(!editor)return;
+  function scheduleFeatures(sourceId,targetId){const id=key(sourceId,targetId);clearTimeout(timers[id]);timers[id]=setTimeout(()=>translateFeatures(sourceId,targetId),900)}
+
+  function installFeatureControl(sourceId,targetId){
+    const editor=$(sourceId+'Editor');if(!editor)return;
+    const head=editor.querySelector('.ve-feature-head');if(!head||head.dataset.translationReady)return;
+    head.dataset.translationReady='1';
+    const wrap=document.createElement('div');wrap.className='auto-feature-translate';wrap.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto';
+    const b=addButton(targetLang(targetId)==='en'?'↔ Auto English':'↔ Auto Hindi',()=>translateFeatures(sourceId,targetId,true));
+    wrap.appendChild(b);
+    const add=head.querySelector('.ve-feature-add');if(add)wrap.appendChild(add);
+    head.appendChild(wrap);
+  }
+
+  function featureInput(e){
+    const input=e.target.closest('.ve-feature-input');if(!input)return;
+    const editor=input.closest('.ve-feature-editor');if(!editor)return;
     const sourceId=editor.id.replace(/Editor$/,'');
     const targetId=sourceId==='featuresHi'?'featuresEn':'featuresHi';
-    schedule(sourceId,targetId);
+    scheduleFeatures(sourceId,targetId);
+  }
+
+  function install(){
+    installDescriptionControls();
+    installFeatureControl('featuresHi','featuresEn');
+    installFeatureControl('featuresEn','featuresHi');
   }
 
   function init(){
-    setupDescriptionPair(pairs.find(p=>!p.feature));
+    install();
     document.addEventListener('input',featureInput);
+    const observer=new MutationObserver(install);
+    observer.observe(document.body,{subtree:true,childList:true});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
