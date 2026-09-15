@@ -8,19 +8,23 @@
   const state={};
   const syncing=new Set();
   const read=id=>String(document.getElementById(id)?.value||'').split(/\r?\n/).map(strip).map(x=>x.trim()).filter(Boolean);
-  const syncTextarea=(id,emit=false)=>{const ta=document.getElementById(id);if(!ta)return;const value=(state[id]||[]).filter(Boolean).join('\n');if(ta.value===value)return;syncing.add(id);ta.value=value;syncing.delete(id);if(emit)ta.dispatchEvent(new CustomEvent('ve-feature-change',{bubbles:true,detail:{id}}))};
+  const syncTextarea=(id,emit=false)=>{
+    const ta=document.getElementById(id);if(!ta)return;
+    const value=(state[id]||[]).filter(Boolean).join('\n');
+    if(ta.value===value)return;
+    syncing.add(id);
+    ta.value=value;
+    if(emit)ta.dispatchEvent(new CustomEvent('ve-feature-change',{bubbles:true,detail:{id}}));
+    syncing.delete(id);
+  };
   function render(id,focusIndex=-1){
     const box=document.getElementById(id+'Editor');if(!box)return;
     const items=state[id]||[];
     box.querySelector('.ve-feature-list').innerHTML=items.map((item,i)=>`<div class="ve-feature-row"><span class="ve-feature-bullet" aria-hidden="true">•</span><input class="ve-feature-input" data-index="${i}" type="text" value="${esc(item)}" placeholder="${esc(pairs.find(p=>p.id===id)?.placeholder||'')}"><button type="button" class="ve-feature-remove" data-index="${i}" aria-label="Remove feature">×</button></div>`).join('')||`<div class="ve-feature-empty">No bullet points yet. Click <strong>＋ Add feature</strong> to start.</div>`;
     if(focusIndex>=0)requestAnimationFrame(()=>{const el=box.querySelector(`.ve-feature-input[data-index="${focusIndex}"]`);if(el){el.focus({preventScroll:true});el.setSelectionRange(el.value.length,el.value.length)}})
   }
-  function setFromTextarea(id,focus=false){
-    state[id]=read(id);if(!state[id].length)state[id]=[''];render(id,focus?state[id].length-1:-1)
-  }
-  function updateFromTextarea(id,focusIndex=-1){
-    const incoming=read(id);state[id]=incoming.length?incoming:[''];render(id,focusIndex)
-  }
+  function setFromTextarea(id,focus=false){state[id]=read(id);if(!state[id].length)state[id]=[''];render(id,focus?state[id].length-1:-1)}
+  function updateFromTextarea(id,focusIndex=-1){const incoming=read(id);state[id]=incoming.length?incoming:[''];render(id,focusIndex)}
   function build(pair){
     const ta=document.getElementById(pair.id);if(!ta||document.getElementById(pair.id+'Editor'))return;
     state[pair.id]=read(pair.id);if(!state[pair.id].length)state[pair.id]=[''];
