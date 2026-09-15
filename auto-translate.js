@@ -14,6 +14,7 @@
     try{
       const url='/.netlify/functions/translate?source='+encodeURIComponent(source)+'&target='+encodeURIComponent(target)+'&text='+encodeURIComponent(value);
       const r=await fetch(url,{cache:'no-store',headers:{Accept:'application/json'}});
+      if(!r.ok)return '';
       const data=await r.json().catch(()=>null);
       return r.ok&&data?.success?clean(data.translated):'';
     }catch{return ''}
@@ -42,8 +43,10 @@
     const hi=$('descriptionHi'),en=$('descriptionEn');if(!hi||!en)return;
     if(!hi.dataset.translationReady){
       hi.dataset.translationReady='1';en.dataset.translationReady='1';
-      hi.closest('label')?.insertBefore(addButton('↔ Auto English',()=>translateDescription('descriptionHi','descriptionEn',true)),hi);
-      en.closest('label')?.insertBefore(addButton('↔ Auto Hindi',()=>translateDescription('descriptionEn','descriptionHi',true)),en);
+      const hb=addButton('↔ Auto English',()=>translateDescription('descriptionHi','descriptionEn',true));
+      const eb=addButton('↔ Auto Hindi',()=>translateDescription('descriptionEn','descriptionHi',true));
+      hi.closest('label')?.insertBefore(hb,hi);
+      en.closest('label')?.insertBefore(eb,en);
       hi.addEventListener('input',()=>{if(consumeAuto(hi))return;clearTimeout(timers[key('descriptionEn','descriptionHi')]);scheduleDescription('descriptionHi','descriptionEn')});
       en.addEventListener('input',()=>{if(consumeAuto(en))return;clearTimeout(timers[key('descriptionHi','descriptionEn')]);scheduleDescription('descriptionEn','descriptionHi')});
     }
@@ -70,12 +73,13 @@
 
   function installFeatureControl(sourceId,targetId){
     const editor=$(sourceId+'Editor');if(!editor)return;
-    const head=editor.querySelector('.ve-feature-head');if(!head||head.dataset.translationReady)return;
+    const head=editor.querySelector('.ve-feature-head');if(!head)return;
+    if(head.dataset.translationReady==='1')return;
     head.dataset.translationReady='1';
     const wrap=document.createElement('div');wrap.className='auto-feature-translate';wrap.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto';
-    const b=addButton(targetLang(targetId)==='en'?'↔ Auto English':'↔ Auto Hindi',()=>translateFeatures(sourceId,targetId,true));
-    wrap.appendChild(b);
-    const add=head.querySelector('.ve-feature-add');if(add)wrap.appendChild(add);
+    wrap.appendChild(addButton(targetLang(targetId)==='en'?'↔ Auto English':'↔ Auto Hindi',()=>translateFeatures(sourceId,targetId,true)));
+    const add=head.querySelector('.ve-feature-add');
+    if(add)wrap.appendChild(add);
     head.appendChild(wrap);
   }
 
@@ -84,6 +88,7 @@
     const editor=input.closest('.ve-feature-editor');if(!editor)return;
     const sourceId=editor.id.replace(/Editor$/,'');
     const targetId=sourceId==='featuresHi'?'featuresEn':'featuresHi';
+    if(consumeAuto($(sourceId)))return;
     scheduleFeatures(sourceId,targetId);
   }
 
@@ -96,7 +101,7 @@
   function init(){
     install();
     document.addEventListener('input',featureInput);
-    const observer=new MutationObserver(install);
+    const observer=new MutationObserver(()=>install());
     observer.observe(document.body,{subtree:true,childList:true});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
