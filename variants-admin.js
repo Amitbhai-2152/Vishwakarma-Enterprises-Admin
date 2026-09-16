@@ -96,6 +96,7 @@
     if(!variants.length){toast('Add at least one size/variant and enter its MRP.');return}
     if(variants.some(v=>v.mrp<0||!Number.isFinite(v.mrp))){toast('Please enter a valid MRP for every size/variant.');return}
     const status=input('productStatus')?.value==='hidden'?'hidden':'active';
+    const unit=['piece','meter','kg','litre','box'].includes(input('unit')?.value)?input('unit').value:'piece';
     const product={
       id,
       brand:input('brand').value.trim(),
@@ -105,6 +106,7 @@
       features:{hi:parseLines(input('featuresHi').value),en:parseLines(input('featuresEn').value)},
       sizes:variants,
       mrp:Number(variants[0].mrp)||0,
+      unit,
       image:selectedImageData||previous?.image||fallbackImage,
       featured:input('featured').checked,
       status
