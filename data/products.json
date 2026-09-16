@@ -3,12 +3,40 @@
     "id": "P003",
     "brand": "Your Brand",
     "category": "plumbing",
-    "name": {"hi": "उत्पाद 03", "en": "Product 03"},
-    "description": {"hi": "iska use naali ke liye bhi kiya jata hai\naur yah bahut mahaanga hai", "en": "It is also used for drain\nand this is very expensive"},
-    "features": {"hi": ["ye naali me prayog kiya jaa sakta hai", "mera naam amit hai"], "en": ["This can be used in drain", "my name is amit hai"]},
-    "sizes": [{"name": "45mm", "mrp": 100}, {"name": "12mm", "mrp": 199.97}, {"name": "200mm", "mrp": 1000}],
+    "name": {
+      "hi": "उत्पाद 03",
+      "en": "Product 03"
+    },
+    "description": {
+      "hi": "iska use naali ke liye bhi kiya jata hai\naur yah bahut mahaanga hai",
+      "en": "It is also used for drain\nand this is very expensive"
+    },
+    "features": {
+      "hi": [
+        "ye naali me prayog kiya jaa sakta hai",
+        "mera naam amit hai"
+      ],
+      "en": [
+        "This can be used in drain",
+        "my name is amit hai"
+      ]
+    },
+    "sizes": [
+      {
+        "name": "45m",
+        "mrp": 100
+      },
+      {
+        "name": "12m",
+        "mrp": 199.97
+      },
+      {
+        "name": "200m",
+        "mrp": 1000
+      }
+    ],
     "mrp": 100,
-    "unit": "piece",
+    "unit": "meter",
     "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
     "featured": true,
     "status": "active"
@@ -17,9 +45,18 @@
     "id": "P004",
     "brand": "Your Brand",
     "category": "water",
-    "name": {"hi": "उत्पाद 04", "en": "Product 04"},
-    "description": {"hi": "यहाँ उत्पाद का विवरण लिखें।", "en": "Write the product description here."},
-    "features": {"hi": [], "en": []},
+    "name": {
+      "hi": "उत्पाद 04",
+      "en": "Product 04"
+    },
+    "description": {
+      "hi": "यहाँ उत्पाद का विवरण लिखें।",
+      "en": "Write the product description here."
+    },
+    "features": {
+      "hi": [],
+      "en": []
+    },
     "sizes": [],
     "mrp": 449,
     "unit": "piece",
@@ -31,9 +68,18 @@
     "category": "pumps",
     "brand": "Your Brand",
     "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
-    "name": {"hi": "उत्पाद 05", "en": "Product 05"},
-    "description": {"hi": "यहाँ उत्पाद का विवरण लिखें।", "en": "Write the product description here."},
-    "features": {"hi": [], "en": []},
+    "name": {
+      "hi": "उत्पाद 05",
+      "en": "Product 05"
+    },
+    "description": {
+      "hi": "यहाँ उत्पाद का विवरण लिखें।",
+      "en": "Write the product description here."
+    },
+    "features": {
+      "hi": [],
+      "en": []
+    },
     "sizes": [],
     "mrp": 0,
     "unit": "piece",
@@ -44,9 +90,18 @@
     "category": "hardware",
     "brand": "Your Brand",
     "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
-    "name": {"hi": "उत्पाद 06", "en": "Product 06"},
-    "description": {"hi": "यहाँ उत्पाद का विवरण लिखें।", "en": "Write the product description here."},
-    "features": {"hi": [], "en": []},
+    "name": {
+      "hi": "उत्पाद 06",
+      "en": "Product 06"
+    },
+    "description": {
+      "hi": "यहाँ उत्पाद का विवरण लिखें।",
+      "en": "Write the product description here."
+    },
+    "features": {
+      "hi": [],
+      "en": []
+    },
     "sizes": [],
     "mrp": 0,
     "unit": "piece",
@@ -57,9 +112,18 @@
     "category": "plumbing",
     "brand": "Your Brand",
     "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
-    "name": {"hi": "उत्पाद 07", "en": "Product 07"},
-    "description": {"hi": "यहाँ उत्पाद का विवरण लिखें।", "en": "Write the product description here."},
-    "features": {"hi": [], "en": []},
+    "name": {
+      "hi": "उत्पाद 07",
+      "en": "Product 07"
+    },
+    "description": {
+      "hi": "यहाँ उत्पाद का विवरण लिखें।",
+      "en": "Write the product description here."
+    },
+    "features": {
+      "hi": [],
+      "en": []
+    },
     "sizes": [],
     "mrp": 0,
     "unit": "piece",
@@ -70,9 +134,18 @@
     "category": "water",
     "brand": "Your Brand",
     "image": "https://raw.githubusercontent.com/Amitbhai-2152/Vishwakarma-Enterprises/main/images/shop3.jpeg",
-    "name": {"hi": "उत्पाद 08", "en": "Product 08"},
-    "description": {"hi": "यहाँ उत्पाद का विवरण लिखें।", "en": "Write the product description here."},
-    "features": {"hi": [], "en": []},
+    "name": {
+      "hi": "उत्पाद 08",
+      "en": "Product 08"
+    },
+    "description": {
+      "hi": "यहाँ उत्पाद का विवरण लिखें।",
+      "en": "Write the product description here."
+    },
+    "features": {
+      "hi": [],
+      "en": []
+    },
     "sizes": [],
     "mrp": 0,
     "unit": "piece",
@@ -82,9 +155,18 @@
     "id": "P009",
     "brand": "Your Brand",
     "category": "pumps",
-    "name": {"hi": "उत्पाद 09", "en": "Product 09"},
-    "description": {"hi": "यहाँ उत्पाद का विवरण लिखें।", "en": "Write the product description here."},
-    "features": {"hi": [], "en": []},
+    "name": {
+      "hi": "उत्पाद 09",
+      "en": "Product 09"
+    },
+    "description": {
+      "hi": "यहाँ उत्पाद का विवरण लिखें।",
+      "en": "Write the product description here."
+    },
+    "features": {
+      "hi": [],
+      "en": []
+    },
     "sizes": [],
     "mrp": 499.66,
     "unit": "piece",
