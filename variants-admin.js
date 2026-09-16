@@ -104,6 +104,7 @@
       name:{hi:nameHi,en:nameEn},
       description:{hi:input('descriptionHi').value.trim(),en:input('descriptionEn').value.trim()},
       features:{hi:parseLines(input('featuresHi').value),en:parseLines(input('featuresEn').value)},
+      specifications:previous?.specifications||{hi:{},en:{}},
       sizes:variants,
       mrp:Number(variants[0].mrp)||0,
       unit,
